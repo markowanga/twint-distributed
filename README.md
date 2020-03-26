@@ -13,7 +13,8 @@ to scrap twitter data.
  on other instance
  - Workaround twitter limit, which disallow to download many data from one ip address
  - All data are gathered into one location
- 
+ - Use docker whenever possible
+  
  ## How it works
  1. User add commands to scrap by HTTP request
  2. As a request result, server add commands to RabbitMQ for scrap data, 
