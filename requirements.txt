@@ -1,0 +1,6 @@
+flask
+requests
+pysocks
+pandas
+numpy
+pika

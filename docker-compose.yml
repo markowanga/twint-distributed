@@ -1,0 +1,7 @@
+version: "3.7"
+services:
+  test:
+    build: .
+    volumes:
+      - ./src:/app
+    command: python -u /app/test.py
