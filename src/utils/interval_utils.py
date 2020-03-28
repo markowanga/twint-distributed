@@ -6,6 +6,7 @@ from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 
 import utils.time_utils as time_utils
+from model.time_interval import TimeInterval
 
 TWITTER_START_TIME = parse('2006-03-21 00:00:00')
 
@@ -35,21 +36,6 @@ class TimeIntervalType(Enum):
             TimeIntervalType.QUARTER_OF_YEAR: relativedelta(months=3),
             TimeIntervalType.YEAR: relativedelta(years=1)
         }[self]
-
-
-class TimeInterval:
-    def __init__(self, start: datetime.datetime = None, end: datetime.datetime = None):
-        self._start = start
-        self._end = end
-
-    def get_start(self) -> datetime.datetime:
-        return self._start
-
-    def get_end(self) -> datetime.datetime:
-        return self._end
-
-    def __repr__(self):
-        return "TimeInterval(start=" + str(self._start) + ", end=" + str(self._end) + ")"
 
 
 def get_list_interval(

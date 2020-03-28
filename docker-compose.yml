@@ -1,7 +1,40 @@
 version: "3.7"
 services:
-  test:
+
+  rabbitmq:
+    image: rabbitmq:3.8.3-management
+    #    volumes:
+    #      - ./rabbit.conf:/etc/rabbitmq/rabbitmq.conf
+    ports:
+      - 9000:15672
+      - 5672:5672
+
+  flask_command_server:
     build: .
+    command: [python, -u, flask_command_server.py]
+    ports:
+      - 5000:5000
+    environment:
+      - RABBIT_HOST=192.168.0.101
+      - RABBIT_USERNAME=guest
+      - RABBIT_PASSWORD=guest
+
+  hashtag_scrapper:
+    build: .
+    restart: unless-stopped
+    command: [python, -u, scrap_worker.py]
+    environment:
+      - RABBIT_HOST=192.168.0.101
+      - RABBIT_USERNAME=guest
+      - RABBIT_PASSWORD=guest
+      - UPLOAD_FILE_HOST=192.168.0.101:5001
+      - QUEUE_NAME=test
+
+  file_result_receiver:
+    build: .
+    restart: unless-stopped
+    command: [python, -u, flask_file_receiver.py]
     volumes:
-      - ./src:/app
-    command: python -u /app/test.py
+      - ./data:/data
+    ports:
+      - 5001:5000

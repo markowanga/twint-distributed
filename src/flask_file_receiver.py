@@ -1,60 +1,41 @@
 from flask import Flask
 from flask import request, jsonify
 
-import directory_tool
+import utils.directory_utils as directory_utils
+import utils.docker_logs as docker_logs
+
+logger = docker_logs.get_logger('flask_file_receiver')
 
 app = Flask(__name__)
+
+ROOT_DATA_DIR = '/data'
 
 
 def get_success_response():
     return jsonify({'status': 'SUCCESS'})
 
 
-def get_directory_for_user(username: str) -> str:
-    return '/data/user/u_' + username
+def get_data_to_save_directory(series: str, data_type: str, sub_series: str) -> str:
+    return ROOT_DATA_DIR + '/' + series + '/' + data_type + '/' + sub_series
 
 
-def get_directory_for_hashtag(hashtag: str) -> str:
-    return '/data/hashtag/h_' + hashtag
-
-
-def get_path_for_user_database_file(username: str, filename: str) -> str:
-    return get_directory_for_user(username) + '/' + filename
-
-
-def get_path_for_hashtag_database_file(hashtag: str, filename: str) -> str:
-    return get_directory_for_hashtag(hashtag) + '/' + filename
-
-
-def prepare_hashtag_directory(hashtag: str):
-    directory_tool.prepare_directory(get_directory_for_hashtag(hashtag))
-
-
-def prepare_user_directory(username: str):
-    directory_tool.prepare_directory(get_directory_for_user(username))
-
-
-@app.route("/upload_user_db_file", methods=['POST'])
-def upload_user_db_file():
+@app.route("/upload_result_file", methods=['POST'])
+def upload_result_file():
     file = request.files['file']
     data = request.form
-    username = data['username']
+    series = data['series']
+    sub_series = data['sub_series']
     filename = data['filename']
-    prepare_user_directory(username)
-    file.save(get_path_for_user_database_file(username, filename))
-    return get_success_response()
+    data_type = data['data_type']
 
+    file_directory = get_data_to_save_directory(series, data_type, sub_series)
+    file_path = file_directory + '/' + filename
 
-@app.route("/upload_hashtag_db_file", methods=['POST'])
-def upload_hashtag_db_file():
-    file = request.files['file']
-    data = request.form
-    hashtag = data['hashtag']
-    filename = data['filename']
-    prepare_hashtag_directory(hashtag)
-    file.save(get_path_for_hashtag_database_file(hashtag, filename))
+    directory_utils.prepare_directory(file_directory)
+    file.save(file_path)
+
     return get_success_response()
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", debug=True)

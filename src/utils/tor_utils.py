@@ -2,15 +2,15 @@ import time
 
 import requests
 
-import command_tool
-import docker_logs
+import utils.command_utils as command_utils
+import utils.docker_logs as docker_logs
 
 logger = docker_logs.get_logger('tor_utils')
 
 
 def _start_tor():
     logger.info('start tor proxy')
-    command_tool.run_bash_command('tor &')
+    command_utils.run_bash_command('tor &')
     return
 
 
