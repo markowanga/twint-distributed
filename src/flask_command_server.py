@@ -44,7 +44,7 @@ def add_user_tweets_to_scrap():
 def add_user_profile_to_scrap():
     queue_name = request.form['queue_name']
     username = request.form['username']
-    params = user_scrap_params.ProfileMetadataScrapParams(username)
+    params = user_scrap_params.ProfileDetailsScrapParams(username)
     params_str = ParamsEncoder().default(params)
     logger.info(params_str + " " + queue_name)
     send_to_rabbit(queue_name, params_str)

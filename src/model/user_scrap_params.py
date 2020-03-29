@@ -39,7 +39,7 @@ class ProfileTweetsScrapParams:
         )
 
 
-class ProfileMetadataScrapParams:
+class ProfileDetailsScrapParams:
 
     def __init__(self, username: str):
         self._username = username
