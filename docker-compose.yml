@@ -10,28 +10,32 @@ services:
       - 5672:5672
 
   flask_command_server:
-    image: marcinwatroba/twint-distributed
+    build: .
+    #    image: marcinwatroba/twint-distributed
+    restart: unless-stopped
     command: [python, -u, flask_command_server.py]
     ports:
       - 5000:5000
     environment:
-      - RABBIT_HOST=192.168.0.101
+      - RABBIT_HOST=192.168.0.103
       - RABBIT_USERNAME=guest
       - RABBIT_PASSWORD=guest
 
-  hashtag_scrapper:
-    image: marcinwatroba/twint-distributed
+  scrapper_consumer:
+    build: .
+    #    image: marcinwatroba/twint-distributed
     restart: unless-stopped
     command: [python, -u, scrap_worker.py]
     environment:
-      - RABBIT_HOST=192.168.0.11
+      - RABBIT_HOST=192.168.0.103
       - RABBIT_USERNAME=guest
       - RABBIT_PASSWORD=guest
-      - UPLOAD_FILE_HOST=192.168.0.101:5001
+      - UPLOAD_FILE_HOST=192.168.0.103:5001
       - QUEUE_NAME=test
 
   file_result_receiver:
-    image: marcinwatroba/twint-distributed
+    build: .
+    #    image: marcinwatroba/twint-distributed
     restart: unless-stopped
     command: [python, -u, flask_file_receiver.py]
     volumes:

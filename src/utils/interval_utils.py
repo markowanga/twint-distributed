@@ -56,6 +56,3 @@ def get_list_interval(
             interval_end_time if interval_end_time < fixed_end else fixed_end
         ))
     return intervals_to_return
-
-
-print(len(get_list_interval(None, None, TimeIntervalType.HOUR)))

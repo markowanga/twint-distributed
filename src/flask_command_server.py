@@ -10,7 +10,6 @@ import utils.docker_logs as docker_logs
 import utils.interval_utils as interval_utils
 from model.time_interval import TimeInterval
 from utils.params_encoder import ParamsEncoder
-
 from utils.rabbit_send_utils import send_to_rabbit
 
 logger = docker_logs.get_logger('command_server')
@@ -33,18 +32,18 @@ def add_user_tweets_to_scrap():
     queue_name = request.form['queue_name']
     username = request.form['username']
     for interval in get_interval_list():
-        params = user_scrap_params.ProfileTweetsScrapParams(username, interval.get_start(), interval.get_end())
+        params = user_scrap_params.UserTweetsScrapParams(username, interval.get_start(), interval.get_end(), queue_name)
         params_str = ParamsEncoder().default(params)
         logger.info(params_str + " " + queue_name)
         send_to_rabbit(queue_name, params_str)
     return get_success_response()
 
 
-@app.route("/add_user_profile_to_scrap", methods=['POST'])
-def add_user_profile_to_scrap():
+@app.route("/add_user_details_to_scrap", methods=['POST'])
+def add_user_details_to_scrap():
     queue_name = request.form['queue_name']
     username = request.form['username']
-    params = user_scrap_params.ProfileDetailsScrapParams(username)
+    params = user_scrap_params.UserDetailsScrapParams(username, queue_name)
     params_str = ParamsEncoder().default(params)
     logger.info(params_str + " " + queue_name)
     send_to_rabbit(queue_name, params_str)

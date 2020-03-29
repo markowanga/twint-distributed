@@ -6,7 +6,7 @@ import utils.docker_logs as docker_logs
 from configuration.proxy_config import ProxyConfig
 from model.hashtag_scrap_params import SearchScrapParams
 from model.time_interval import TimeInterval
-from model.user_scrap_params import ProfileTweetsScrapParams, ProfileDetailsScrapParams
+from model.user_scrap_params import UserTweetsScrapParams, UserDetailsScrapParams
 
 logger = docker_logs.get_logger('scrap_service')
 
@@ -51,14 +51,14 @@ def search_tweets(
 
 
 def get_user_details(
-        params: ProfileDetailsScrapParams,
+        params: UserDetailsScrapParams,
         db_file_path: str,
         proxy_config: Optional[ProxyConfig]
 ):
     logger.info('start scrap user details: ' + params.get_username())
     twint_config = get_common_config(None, db_file_path, proxy_config)
     twint_config.Username = params.get_username()
-    twint_config.User_full = True
+    # twint_config.User_full = True
     logger.info('scrap user profile:   ' + params.get_username())
     twint.run.Lookup(twint_config)
     logger.info('scrap user followers: ' + params.get_username())
@@ -72,7 +72,7 @@ def get_user_details(
 
 
 def get_user_tweets(
-        params: ProfileTweetsScrapParams,
+        params: UserTweetsScrapParams,
         db_file_path: str,
         proxy_config: Optional[ProxyConfig]
 ):
