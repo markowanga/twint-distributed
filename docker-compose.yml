@@ -1,25 +1,25 @@
 version: "3.7"
 services:
 
-  rabbitmq:
-    image: rabbitmq:3.8.3-management
-    #    volumes:
-    #      - ./rabbit.conf:/etc/rabbitmq/rabbitmq.conf
-    ports:
-      - 9000:15672
-      - 5672:5672
-
-  flask_command_server:
-    build: .
-    #    image: marcinwatroba/twint-distributed
-    restart: unless-stopped
-    command: [python, -u, flask_command_server.py]
-    ports:
-      - 5000:5000
-    environment:
-      - RABBIT_HOST=192.168.0.103
-      - RABBIT_USERNAME=guest
-      - RABBIT_PASSWORD=guest
+#  rabbitmq:
+#    image: rabbitmq:3.8.3-management
+#    #    volumes:
+#    #      - ./rabbit.conf:/etc/rabbitmq/rabbitmq.conf
+#    ports:
+#      - 9000:15672
+#      - 5672:5672
+#
+#  flask_command_server:
+#    build: .
+#    #    image: marcinwatroba/twint-distributed
+#    restart: unless-stopped
+#    command: [python, -u, flask_command_server.py]
+#    ports:
+#      - 5000:5000
+#    environment:
+#      - RABBIT_HOST=192.168.0.103
+#      - RABBIT_USERNAME=guest
+#      - RABBIT_PASSWORD=guest
 
   scrapper_consumer:
     build: .
@@ -27,18 +27,18 @@ services:
     restart: unless-stopped
     command: [python, -u, scrap_worker.py]
     environment:
-      - RABBIT_HOST=192.168.0.103
+      - RABBIT_HOST=192.168.0.124
       - RABBIT_USERNAME=guest
       - RABBIT_PASSWORD=guest
-      - UPLOAD_FILE_HOST=192.168.0.103:5001
-      - QUEUE_NAME=test
+      - UPLOAD_FILE_HOST=192.168.0.124:5001
+      - QUEUE_NAME=bot_detection
 
-  file_result_receiver:
-    build: .
-    #    image: marcinwatroba/twint-distributed
-    restart: unless-stopped
-    command: [python, -u, flask_file_receiver.py]
-    volumes:
-      - ./data:/data
-    ports:
-      - 5001:5000
+#  file_result_receiver:
+#    build: .
+#    #    image: marcinwatroba/twint-distributed
+#    restart: unless-stopped
+#    command: [python, -u, flask_file_receiver.py]
+#    volumes:
+#      - ./data:/data
+#    ports:
+#      - 5001:5000

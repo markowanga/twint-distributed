@@ -1,15 +1,16 @@
 import datetime
+import functools
 import json
+import threading
 import time
 
 import pika
 
 import configuration.proxy_config as proxy_config
-import configuration.worker_config as worker_config
 import scrap_service
 import utils.docker_logs as docker_logs
 import utils.tor_utils as tor_utils
-from configuration import rabbit_config
+from configuration import rabbit_config, worker_config
 from model.hashtag_scrap_params import SearchScrapParams
 from model.scrap_type import ScrapType
 from model.user_scrap_params import UserTweetsScrapParams, UserDetailsScrapParams
@@ -129,8 +130,21 @@ def get_scrap_method(scrap_type: ScrapType):
     }[scrap_type]
 
 
-def process_message(ch, method, properties, body):
+def ack_message(ch, delivery_tag):
+    """Note that `ch` must be the same pika channel instance via which
+    the message being ACKed was retrieved (AMQP protocol constraint).
+    """
+    if ch.is_open:
+        ch.basic_ack(delivery_tag)
+    else:
+        # Channel is already closed, so we can't ACK this message;
+        # log and/or do something that makes sense for your app in this case.
+        pass
+
+
+def process_message(body):
     logger.info(" [x] Received %r" % body)
+    time.sleep(500)
     body_string = body.decode("utf-8")
     parsed_body = json.loads(body_string)
     message_type: ScrapType = [it for it in ScrapType if parsed_body['_type'] in str(it)][0]
@@ -157,8 +171,15 @@ def process_message(ch, method, properties, body):
             try_count = try_count - 1
             logger.error("Error during work")
             logger.exception(exception)
-    if is_success:
-        ch.basic_ack(method.delivery_tag)
+    return
+
+
+def do_work(conn, ch, delivery_tag, body):
+    thread_id = threading.get_ident()
+    logger.info('Thread id: %s Delivery tag: %s Message body: %s', thread_id, delivery_tag, body)
+    process_message(body)
+    cb = functools.partial(ack_message, ch, delivery_tag)
+    conn.add_callback_threadsafe(cb)
     return
 
 
@@ -175,12 +196,39 @@ def prepare_rabbit_connect() -> pika.BlockingConnection:
     raise Exception("can't connect with rabbitMQ")
 
 
+def on_message(ch, method_frame, _header_frame, body, args):
+    (conn, thrds) = args
+    delivery_tag = method_frame.delivery_tag
+    t = threading.Thread(target=do_work, args=(conn, ch, delivery_tag, body))
+    t.start()
+    thrds.append(t)
+
+
 connection = prepare_rabbit_connect()
 channel = connection.channel()
-channel.basic_qos(prefetch_count=2)
 
+channel.exchange_declare(
+    exchange="test_exchange",
+    exchange_type="direct",
+    passive=False,
+    durable=True,
+    auto_delete=False)
 channel.queue_declare(queue=worker_config.get_queue_name(), durable=True)
-channel.basic_consume(queue=worker_config.get_queue_name(), on_message_callback=process_message)
+# channel.queue_bind(queue=worker_config.get_queue_name())
+# Note: prefetch is set to 1 here as an example only and to keep the number of threads created
+# to a reasonable amount. In production you will want to test with different prefetch values
+# to find which one provides the best performance and usability for your solution
+channel.basic_qos(prefetch_count=1)
 
-logger.info(' [*] Waiting for messages. To exit press CTRL+C')
-channel.start_consuming()
+threads = []
+on_message_callback = functools.partial(on_message, args=(connection, threads))
+channel.basic_consume(queue=worker_config.get_queue_name(), on_message_callback=on_message_callback)
+
+try:
+    channel.start_consuming()
+except KeyboardInterrupt:
+    channel.stop_consuming()
+
+# Wait for all to complete
+for thread in threads:
+    thread.join()

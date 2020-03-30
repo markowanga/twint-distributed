@@ -14,5 +14,5 @@ def get_rabbit_connection_config() -> pika.ConnectionParameters:
             username=_rabbit_username,
             password=_rabbit_password
         ),
-        heartbeat=0
+        heartbeat=30
     )
