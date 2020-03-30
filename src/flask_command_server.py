@@ -50,6 +50,39 @@ def add_user_details_to_scrap():
     return get_success_response()
 
 
+@app.route("/add_user_followings_to_scrap", methods=['POST'])
+def add_user_followings_to_scrap():
+    queue_name = request.form['queue_name']
+    username = request.form['username']
+    params = user_scrap_params.UserFollowingScrapParams(username, queue_name)
+    params_str = ParamsEncoder().default(params)
+    logger.info(params_str + " " + queue_name)
+    send_to_rabbit(queue_name, params_str)
+    return get_success_response()
+
+
+@app.route("/add_user_followers_to_scrap", methods=['POST'])
+def add_user_following_to_scrap():
+    queue_name = request.form['queue_name']
+    username = request.form['username']
+    params = user_scrap_params.UserFollowersScrapParams(username, queue_name)
+    params_str = ParamsEncoder().default(params)
+    logger.info(params_str + " " + queue_name)
+    send_to_rabbit(queue_name, params_str)
+    return get_success_response()
+
+
+@app.route("/add_user_favorites_to_scrap", methods=['POST'])
+def add_user_favorites_to_scrap():
+    queue_name = request.form['queue_name']
+    username = request.form['username']
+    params = user_scrap_params.UserFavoritesScrapParams(username, queue_name)
+    params_str = ParamsEncoder().default(params)
+    logger.info(params_str + " " + queue_name)
+    send_to_rabbit(queue_name, params_str)
+    return get_success_response()
+
+
 @app.route("/add_search_to_scrap", methods=['POST'])
 def add_search_to_scrap():
     logger.info('add_search_to_scrap')
