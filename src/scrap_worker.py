@@ -144,7 +144,6 @@ def ack_message(ch, delivery_tag):
 
 def process_message(body):
     logger.info(" [x] Received %r" % body)
-    time.sleep(500)
     body_string = body.decode("utf-8")
     parsed_body = json.loads(body_string)
     message_type: ScrapType = [it for it in ScrapType if parsed_body['_type'] in str(it)][0]
