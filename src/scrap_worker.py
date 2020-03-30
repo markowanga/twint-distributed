@@ -36,8 +36,20 @@ def get_user_tweets_filename(params: UserTweetsScrapParams) -> str:
         params.get_scrap_to()) + '.db'
 
 
-def get_user_profile_filename(params: UserDetailsScrapParams) -> str:
+def get_user_details_filename(params: UserDetailsScrapParams) -> str:
     return 'ud_' + params.get_username() + '.db'
+
+
+def get_user_favorites_filename(params: UserDetailsScrapParams) -> str:
+    return 'ufa_' + params.get_username() + '.db'
+
+
+def get_user_followers_filename(params: UserDetailsScrapParams) -> str:
+    return 'ufe_' + params.get_username() + '.db'
+
+
+def get_user_following_filename(params: UserDetailsScrapParams) -> str:
+    return 'ufi_' + params.get_username() + '.db'
 
 
 def scrap_by_search_to_file(parsed_body):
@@ -64,8 +76,41 @@ def scrap_user_tweets_to_file(parsed_body):
 
 def scrap_user_details_to_file(parsed_body):
     params: UserDetailsScrapParams = UserDetailsScrapParams.from_dict(parsed_body)
-    filename = get_user_profile_filename(params)
+    filename = get_user_details_filename(params)
     scrap_service.get_user_details(params, filename, proxy_config.default_proxy_config)
+    return {
+        'filename': filename,
+        'series': parsed_body['_scrap_series'],
+        'sub_series': 'u_' + params.get_username(),
+    }
+
+
+def scrap_user_favorites_to_file(parsed_body):
+    params: UserDetailsScrapParams = UserDetailsScrapParams.from_dict(parsed_body)
+    filename = get_user_favorites_filename(params)
+    scrap_service.get_user_favorites(params, filename, proxy_config.default_proxy_config)
+    return {
+        'filename': filename,
+        'series': parsed_body['_scrap_series'],
+        'sub_series': 'u_' + params.get_username(),
+    }
+
+
+def scrap_user_following_to_file(parsed_body):
+    params: UserDetailsScrapParams = UserDetailsScrapParams.from_dict(parsed_body)
+    filename = get_user_following_filename(params)
+    scrap_service.get_user_following(params, filename, proxy_config.default_proxy_config)
+    return {
+        'filename': filename,
+        'series': parsed_body['_scrap_series'],
+        'sub_series': 'u_' + params.get_username(),
+    }
+
+
+def scrap_user_followers_to_file(parsed_body):
+    params: UserDetailsScrapParams = UserDetailsScrapParams.from_dict(parsed_body)
+    filename = get_user_followers_filename(params)
+    scrap_service.get_user_followers(params, filename, proxy_config.default_proxy_config)
     return {
         'filename': filename,
         'series': parsed_body['_scrap_series'],
@@ -77,7 +122,10 @@ def get_scrap_method(scrap_type: ScrapType):
     return {
         ScrapType.SEARCH_BY: scrap_by_search_to_file,
         ScrapType.USER_DETAILS: scrap_user_details_to_file,
-        ScrapType.USER_TWEETS: scrap_user_tweets_to_file
+        ScrapType.USER_TWEETS: scrap_user_tweets_to_file,
+        ScrapType.USER_FOLLOWING: scrap_user_following_to_file,
+        ScrapType.USER_FOLLOWERS: scrap_user_followers_to_file,
+        ScrapType.USER_FAVORITES: scrap_user_favorites_to_file
     }[scrap_type]
 
 

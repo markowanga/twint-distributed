@@ -58,16 +58,47 @@ def get_user_details(
     logger.info('start scrap user details: ' + params.get_username())
     twint_config = get_common_config(None, db_file_path, proxy_config)
     twint_config.Username = params.get_username()
-    # twint_config.User_full = True
-    logger.info('scrap user profile:   ' + params.get_username())
     twint.run.Lookup(twint_config)
-    logger.info('scrap user followers: ' + params.get_username())
-    twint.run.Followers(twint_config)
-    logger.info('scrap user following: ' + params.get_username())
-    twint.run.Following(twint_config)
-    logger.info('scrap user favorites: ' + params.get_username())
-    twint.run.Favorites(twint_config)
     logger.info('finish scrap user details: ' + params.get_username())
+    return
+
+
+def get_user_favorites(
+        params: UserDetailsScrapParams,
+        db_file_path: str,
+        proxy_config: Optional[ProxyConfig]
+):
+    logger.info('start scrap user favorites: ' + params.get_username())
+    twint_config = get_common_config(None, db_file_path, proxy_config)
+    twint_config.Username = params.get_username()
+    twint.run.Favorites(twint_config)
+    logger.info('finish scrap user favorites: ' + params.get_username())
+    return
+
+
+def get_user_followers(
+        params: UserDetailsScrapParams,
+        db_file_path: str,
+        proxy_config: Optional[ProxyConfig]
+):
+    logger.info('start scrap user followers: ' + params.get_username())
+    twint_config = get_common_config(None, db_file_path, proxy_config)
+    twint_config.Username = params.get_username()
+    twint.run.Followers(twint_config)
+    logger.info('finish scrap user followers: ' + params.get_username())
+    return
+
+
+def get_user_following(
+        params: UserDetailsScrapParams,
+        db_file_path: str,
+        proxy_config: Optional[ProxyConfig]
+):
+    logger.info('start scrap user following: ' + params.get_username())
+    twint_config = get_common_config(None, db_file_path, proxy_config)
+    twint_config.Username = params.get_username()
+    twint.run.Following(twint_config)
+    logger.info('finish scrap user following: ' + params.get_username())
     return
 
 

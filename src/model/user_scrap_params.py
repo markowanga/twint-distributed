@@ -68,3 +68,78 @@ class UserDetailsScrapParams:
             dictionary['_username'],
             dictionary['_scrap_series']
         )
+
+
+class UserFollowersScrapParams:
+
+    def __init__(self, username: str, scrap_series: str):
+        self._username = username
+        self._type = ScrapType.USER_FOLLOWERS
+        self._scrap_series = scrap_series
+        return
+
+    def get_username(self) -> str:
+        return self._username
+
+    def get_type(self) -> ScrapType:
+        return self._type
+
+    def get_scrap_series(self) -> str:
+        return self._scrap_series
+
+    @staticmethod
+    def from_dict(dictionary):
+        return UserDetailsScrapParams(
+            dictionary['_username'],
+            dictionary['_scrap_series']
+        )
+
+
+class UserFollowingScrapParams:
+
+    def __init__(self, username: str, scrap_series: str):
+        self._username = username
+        self._type = ScrapType.USER_FOLLOWING
+        self._scrap_series = scrap_series
+        return
+
+    def get_username(self) -> str:
+        return self._username
+
+    def get_type(self) -> ScrapType:
+        return self._type
+
+    def get_scrap_series(self) -> str:
+        return self._scrap_series
+
+    @staticmethod
+    def from_dict(dictionary):
+        return UserDetailsScrapParams(
+            dictionary['_username'],
+            dictionary['_scrap_series']
+        )
+
+
+class UserFavoritesScrapParams:
+
+    def __init__(self, username: str, scrap_series: str):
+        self._username = username
+        self._type = ScrapType.USER_FAVORITES
+        self._scrap_series = scrap_series
+        return
+
+    def get_username(self) -> str:
+        return self._username
+
+    def get_type(self) -> ScrapType:
+        return self._type
+
+    def get_scrap_series(self) -> str:
+        return self._scrap_series
+
+    @staticmethod
+    def from_dict(dictionary):
+        return UserDetailsScrapParams(
+            dictionary['_username'],
+            dictionary['_scrap_series']
+        )
