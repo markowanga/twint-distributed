@@ -8,6 +8,7 @@ import command_service
 import utils.docker_logs as docker_logs
 import utils.interval_utils as interval_utils
 from model.scrap_type import ScrapType
+from utils import commands_mysql_utils
 
 logger = docker_logs.get_logger('command_server')
 app = Flask(__name__)
@@ -108,4 +109,5 @@ def get_all_scrapped_users():
 
 
 if __name__ == "__main__":
+    commands_mysql_utils.prepare_database()
     app.run(host="0.0.0.0", debug=True)

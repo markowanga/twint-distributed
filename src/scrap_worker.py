@@ -13,6 +13,7 @@ from configuration import rabbit_config, worker_config, command_server_config
 from model.hashtag_scrap_params import PhraseScrapTaskParams
 from model.scrap_type import ScrapType
 from model.user_scrap_params import UserTweetsScrapTaskParams, UserDetailsScrapTaskParams
+from upload_result_file_service import upload_result_file
 from utils import command_utils
 
 logger = docker_logs.get_logger('command_server')
@@ -174,8 +175,6 @@ def process_message(body):
     message_type: ScrapType = [it for it in ScrapType if parsed_body['type'] in str(it)][0]
     logger.info('message_type: ' + str(message_type))
 
-    # time.sleep(1)
-
     try_count = 3
     is_success = False
     while not is_success and try_count > 0:
@@ -183,13 +182,13 @@ def process_message(body):
             logger.info('start new job for scrap user')
             logger.info('job_details: ' + body_string)
             scrap_result = get_scrap_method(message_type)(parsed_body)
-            # upload_result_file(
-            #     series=scrap_result['series'],
-            #     sub_series=scrap_result['sub_series'],
-            #     filename=scrap_result['filename'],
-            #     filepath=scrap_result['filename'],
-            #     scrap_type=message_type
-            # )
+            upload_result_file(
+                series=scrap_result['series'],
+                sub_series=scrap_result['sub_series'],
+                filename=scrap_result['filename'],
+                filepath=scrap_result['filename'],
+                scrap_type=message_type
+            )
             command_utils.run_bash_command('rm ' + scrap_result['filename'])
             is_success = True
             logger.info('finished successful: ' + str(parsed_body))
@@ -197,15 +196,15 @@ def process_message(body):
             try_count = try_count - 1
             logger.error("Error during work")
             logger.exception(exception)
-    return
+    return is_success
 
 
 def do_work(conn, ch, delivery_tag, body):
     thread_id = threading.get_ident()
     logger.info('Thread id: %s Delivery tag: %s Message body: %s', thread_id, delivery_tag, body)
-    process_message(body)
-    cb = functools.partial(ack_message, ch, delivery_tag)
-    conn.add_callback_threadsafe(cb)
+    if process_message(body):
+        cb = functools.partial(ack_message, ch, delivery_tag)
+        conn.add_callback_threadsafe(cb)
     return
 
 
