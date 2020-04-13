@@ -20,8 +20,10 @@ def upload_result_file(
         'filename': filename,
         'data_type': scrap_type.name.lower()
     }
-    url = 'http://' + upload_file_config.get_upload_file_host() + '/upload_result_file'
+    url = upload_file_config.get_upload_file_host() + '/upload_result_file'
     post_files = {'file': open(filepath, 'rb')}
     response = requests.post(url, data=post_data, files=post_files)
     logger.info('upload request response with code: ' + str(response.status_code))
+    if response.status_code >= 400:
+        raise Exception()
     return

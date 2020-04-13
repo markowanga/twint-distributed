@@ -1,16 +1,13 @@
 import datetime
+from dataclasses import dataclass
 
 
+@dataclass(frozen=True)
 class TimeInterval:
-    def __init__(self, start: datetime.datetime, end: datetime.datetime):
-        self._start = start
-        self._end = end
+    since: datetime.datetime
+    until: datetime.datetime
 
-    def get_start(self) -> datetime.datetime:
-        return self._start
-
-    def get_end(self) -> datetime.datetime:
-        return self._end
-
-    def __repr__(self):
-        return "TimeInterval(start=" + str(self._start) + ", end=" + str(self._end) + ")"
+    def __init__(self, since: datetime.datetime, until: datetime.datetime):
+        object.__setattr__(self, 'since', since)
+        object.__setattr__(self, 'until', until)
+        return

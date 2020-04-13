@@ -1,4 +1,5 @@
 import datetime
+from dataclasses import dataclass
 from typing import Optional
 
 from dateutil.parser import parse as date_parser
@@ -8,50 +9,48 @@ from model.scrap_type import ScrapType
 from model.time_interval import TimeInterval
 
 
-class SearchScrapParams:
+@dataclass(frozen=True)
+class PhraseScrapTaskParams:
+    task_id: str
+    phrase: str
+    since: datetime.datetime
+    until: datetime.datetime
+    language: Optional[str]
+    scrap_series: str
+    queue_name: str
+    type: ScrapType
+
     def __init__(
             self,
-            search_by: str,
-            scrap_from: datetime.datetime,
-            scrap_to: datetime.datetime,
+            task_id: str,
+            phrase: str,
+            since: datetime.datetime,
+            until: datetime.datetime,
             language: Optional[str],
-            scrap_series: str
+            scrap_series: str,
+            queue_name: str
     ):
-        self._search_by = search_by
-        self._scrap_from = time_utils.remove_microseconds_from_datetime(scrap_from)
-        self._scrap_to = time_utils.remove_microseconds_from_datetime(scrap_to)
-        self._type = ScrapType.SEARCH_BY
-        self._scrap_series = scrap_series
-        self._language = language if language is not None else 'None'
+        object.__setattr__(self, 'task_id', task_id)
+        object.__setattr__(self, 'phrase', phrase)
+        object.__setattr__(self, 'since', time_utils.remove_microseconds_from_datetime(since))
+        object.__setattr__(self, 'until', time_utils.remove_microseconds_from_datetime(until))
+        object.__setattr__(self, 'type', ScrapType.SEARCH_BY_PHRASE)
+        object.__setattr__(self, 'scrap_series', scrap_series)
+        object.__setattr__(self, 'language', language)
+        object.__setattr__(self, 'queue_name', queue_name)
         return
 
-    def get_search_by(self) -> str:
-        return self._search_by
-
-    def get_scrap_from(self) -> datetime.datetime:
-        return self._scrap_from
-
-    def get_scrap_to(self) -> datetime.datetime:
-        return self._scrap_to
-
-    def get_time_interval(self) -> TimeInterval:
-        return TimeInterval(self._scrap_from, self._scrap_to)
-
-    def get_type(self) -> ScrapType:
-        return self._type
-
-    def get_language(self) -> Optional[str]:
-        return None if self._language == 'None' else self._language
-
-    def get_scrap_series(self) -> str:
-        return self._scrap_series
+    def get_time_interval(self):
+        return TimeInterval(self.since, self.until)
 
     @staticmethod
     def from_dict(dictionary):
-        return SearchScrapParams(
-            dictionary['_search_by'],
-            date_parser(dictionary['_scrap_from']),
-            date_parser(dictionary['_scrap_to']),
-            dictionary['_language'],
-            dictionary['_scrap_series']
+        return PhraseScrapTaskParams(
+            dictionary['task_id'],
+            dictionary['phrase'],
+            date_parser(dictionary['since']),
+            date_parser(dictionary['until']),
+            dictionary['language'],
+            dictionary['scrap_series'],
+            dictionary['queue_name']
         )

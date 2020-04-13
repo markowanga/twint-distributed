@@ -4,9 +4,10 @@ import twint
 
 import utils.docker_logs as docker_logs
 from configuration.proxy_config import ProxyConfig
-from model.hashtag_scrap_params import SearchScrapParams
+from model.hashtag_scrap_params import PhraseScrapTaskParams
 from model.time_interval import TimeInterval
-from model.user_scrap_params import UserTweetsScrapParams, UserDetailsScrapParams
+from model.user_scrap_params import UserTweetsScrapTaskParams, UserDetailsScrapTaskParams
+from utils.time_utils import remove_microseconds_from_datetime
 
 logger = docker_logs.get_logger('scrap_service')
 
@@ -22,8 +23,8 @@ def get_common_config(
     twint_config.Hide_output = True
 
     if interval is not None:
-        twint_config.Since = str(interval.get_start())
-        twint_config.Until = str(interval.get_end())
+        twint_config.Since = str(remove_microseconds_from_datetime(interval.since))
+        twint_config.Until = str(remove_microseconds_from_datetime(interval.until))
 
     if proxy_config is not None:
         twint_config.Proxy_host = proxy_config.get_host()
@@ -36,80 +37,80 @@ def get_common_config(
 
 
 def search_tweets(
-        search_params: SearchScrapParams,
+        search_params: PhraseScrapTaskParams,
         db_file_path: str,
         proxy_config: Optional[ProxyConfig]
 ):
-    logger.info('start scrap for search: ' + search_params.get_search_by())
+    logger.info('start scrap for search: ' + search_params.phrase)
     twint_config = get_common_config(search_params.get_time_interval(), db_file_path, proxy_config)
-    twint_config.Search = search_params.get_search_by()
-    if search_params.get_language() is not None:
-        twint_config.Lang = search_params.get_language()
+    twint_config.Search = search_params.phrase
+    if search_params.language is not None:
+        twint_config.Lang = search_params.language
     twint.run.Search(twint_config)
-    logger.info('finish scrap for search: ' + search_params.get_search_by())
+    logger.info('finish scrap for search: ' + search_params.phrase)
     return
 
 
 def get_user_details(
-        params: UserDetailsScrapParams,
+        params: UserDetailsScrapTaskParams,
         db_file_path: str,
         proxy_config: Optional[ProxyConfig]
 ):
-    logger.info('start scrap user details: ' + params.get_username())
+    logger.info('start scrap user details: ' + params.username)
     twint_config = get_common_config(None, db_file_path, proxy_config)
-    twint_config.Username = params.get_username()
+    twint_config.Username = params.username
     twint.run.Lookup(twint_config)
-    logger.info('finish scrap user details: ' + params.get_username())
+    logger.info('finish scrap user details: ' + params.username)
     return
 
 
 def get_user_favorites(
-        params: UserDetailsScrapParams,
+        params: UserDetailsScrapTaskParams,
         db_file_path: str,
         proxy_config: Optional[ProxyConfig]
 ):
-    logger.info('start scrap user favorites: ' + params.get_username())
+    logger.info('start scrap user favorites: ' + params.username)
     twint_config = get_common_config(None, db_file_path, proxy_config)
-    twint_config.Username = params.get_username()
+    twint_config.Username = params.username
     twint.run.Favorites(twint_config)
-    logger.info('finish scrap user favorites: ' + params.get_username())
+    logger.info('finish scrap user favorites: ' + params.username)
     return
 
 
 def get_user_followers(
-        params: UserDetailsScrapParams,
+        params: UserDetailsScrapTaskParams,
         db_file_path: str,
         proxy_config: Optional[ProxyConfig]
 ):
-    logger.info('start scrap user followers: ' + params.get_username())
+    logger.info('start scrap user followers: ' + params.username)
     twint_config = get_common_config(None, db_file_path, proxy_config)
-    twint_config.Username = params.get_username()
+    twint_config.Username = params.username
     twint.run.Followers(twint_config)
-    logger.info('finish scrap user followers: ' + params.get_username())
+    logger.info('finish scrap user followers: ' + params.username)
     return
 
 
 def get_user_following(
-        params: UserDetailsScrapParams,
+        params: UserDetailsScrapTaskParams,
         db_file_path: str,
         proxy_config: Optional[ProxyConfig]
 ):
-    logger.info('start scrap user following: ' + params.get_username())
+    logger.info('start scrap user following: ' + params.username)
     twint_config = get_common_config(None, db_file_path, proxy_config)
-    twint_config.Username = params.get_username()
+    twint_config.Username = params.username
     twint.run.Following(twint_config)
-    logger.info('finish scrap user following: ' + params.get_username())
+    logger.info('finish scrap user following: ' + params.username)
     return
 
 
 def get_user_tweets(
-        params: UserTweetsScrapParams,
+        params: UserTweetsScrapTaskParams,
         db_file_path: str,
         proxy_config: Optional[ProxyConfig]
 ):
-    logger.info('start scrap for user: ' + params.get_username())
+    logger.info('start scrap for user: ' + params.username)
     twint_config = get_common_config(params.get_time_interval(), db_file_path, proxy_config)
-    twint_config.Username = params.get_username()
+    twint_config.Username = params.username
     twint.run.Search(twint_config)
-    logger.info('finish scrap for search: ' + params.get_username())
+    logger.info('finish scrap for search: ' + params.username)
     return

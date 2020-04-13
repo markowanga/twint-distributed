@@ -1,44 +1,58 @@
 version: "3.7"
 services:
 
-#  rabbitmq:
-#    image: rabbitmq:3.8.3-management
-#    #    volumes:
-#    #      - ./rabbit.conf:/etc/rabbitmq/rabbitmq.conf
-#    ports:
-#      - 9000:15672
-#      - 5672:5672
-#
-#  flask_command_server:
-#    build: .
-#    #    image: marcinwatroba/twint-distributed
-#    restart: unless-stopped
-#    command: [python, -u, flask_command_server.py]
-#    ports:
-#      - 5000:5000
-#    environment:
-#      - RABBIT_HOST=192.168.0.103
-#      - RABBIT_USERNAME=guest
-#      - RABBIT_PASSWORD=guest
+  db:
+    image: mysql:8.0.19
+    command: --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: test1234
+    volumes:
+      - ./db_data:/var/lib/mysql
+    ports:
+      - 3307:3306
+
+  rabbitmq:
+    image: rabbitmq:3.8.3-management
+    volumes:
+      - ./rabbit_data:/var/lib/rabbitmq
+    ports:
+      - 9000:15672
+      - 5672:5672
+
+  flask_command_server:
+    image: marcinwatroba/twint-distributed
+    restart: unless-stopped
+    command: [python, -u, command_server.py]
+    ports:
+      - 5000:5000
+    environment:
+      - RABBIT_HOST=192.168.0.101
+      - RABBIT_USERNAME=guest
+      - RABBIT_PASSWORD=guest
+      - MYSQL_HOST=192.168.0.101
+      - MYSQL_PORT=3307
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=test1234
+      - WEBHOOK_HOST=no_host
 
   scrapper_consumer:
-    build: .
-    #    image: marcinwatroba/twint-distributed
+    image: marcinwatroba/twint-distributed
     restart: unless-stopped
     command: [python, -u, scrap_worker.py]
     environment:
-      - RABBIT_HOST=192.168.0.124
+      - RABBIT_HOST=192.168.0.101
       - RABBIT_USERNAME=guest
       - RABBIT_PASSWORD=guest
-      - UPLOAD_FILE_HOST=192.168.0.124:5001
+      - UPLOAD_FILE_HOST=http://192.168.0.101:5001
       - QUEUE_NAME=bot_detection
+      - COMMAND_SERVER_HOST=http://192.168.0.101:5000
 
-#  file_result_receiver:
-#    build: .
-#    #    image: marcinwatroba/twint-distributed
-#    restart: unless-stopped
-#    command: [python, -u, flask_file_receiver.py]
-#    volumes:
-#      - ./data:/data
-#    ports:
-#      - 5001:5000
+  file_result_receiver:
+    image: marcinwatroba/twint-distributed
+    restart: unless-stopped
+    command: [python, -u, flask_file_receiver.py]
+    volumes:
+      - ./data:/data
+    ports:
+      - 5001:5000

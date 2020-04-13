@@ -6,3 +6,7 @@ numpy
 pika
 twint
 python-dateutil
+pymongo
+dacite
+mysql-connector-python
+pymysql

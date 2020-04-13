@@ -15,20 +15,19 @@ def get_success_response():
     return jsonify({'status': 'SUCCESS'})
 
 
-def get_data_to_save_directory(series: str, data_type: str, sub_series: str) -> str:
-    return ROOT_DATA_DIR + '/' + series + '/' + data_type + '/' + sub_series
+def get_data_to_save_directory(data_type: str, sub_series: str) -> str:
+    return ROOT_DATA_DIR + '/scrap_data/' + data_type + '/' + sub_series
 
 
 @app.route("/upload_result_file", methods=['POST'])
 def upload_result_file():
     file = request.files['file']
     data = request.form
-    series = data['series']
     sub_series = data['sub_series']
     filename = data['filename']
     data_type = data['data_type']
 
-    file_directory = get_data_to_save_directory(series, data_type, sub_series)
+    file_directory = get_data_to_save_directory(data_type, sub_series)
     file_path = file_directory + '/' + filename
 
     directory_utils.prepare_directory(file_directory)

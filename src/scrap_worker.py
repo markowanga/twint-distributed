@@ -5,126 +5,156 @@ import threading
 import time
 
 import pika
+import requests
 
-import configuration.proxy_config as proxy_config
-import scrap_service
 import utils.docker_logs as docker_logs
 import utils.tor_utils as tor_utils
-from configuration import rabbit_config, worker_config
-from model.hashtag_scrap_params import SearchScrapParams
+from configuration import rabbit_config, worker_config, command_server_config
+from model.hashtag_scrap_params import PhraseScrapTaskParams
 from model.scrap_type import ScrapType
-from model.user_scrap_params import UserTweetsScrapParams, UserDetailsScrapParams
-from upload_result_file_service import upload_result_file
+from model.user_scrap_params import UserTweetsScrapTaskParams, UserDetailsScrapTaskParams
 from utils import command_utils
 
 logger = docker_logs.get_logger('command_server')
 tor_utils.prepare_tor()
 
 
+def set_task_finished(task_type: ScrapType, task_id: str):
+    post_data = {
+        'task_type': task_type.name,
+        'task_id': task_id
+    }
+    url = command_server_config.get_command_server_host() + '/set_task_as_finished'
+    response = requests.post(url, data=post_data)
+    if response.status_code >= 400:
+        print("ERR set_task_finished code:", response.status_code)
+        raise Exception()
+    return
+
+
+def set_sub_task_finished(task_type: ScrapType, sub_task_id: str):
+    post_data = {
+        'task_type': task_type.name,
+        'sub_task_id': sub_task_id
+    }
+    url = command_server_config.get_command_server_host() + '/set_sub_task_as_finished'
+    response = requests.post(url, data=post_data)
+    if response.status_code >= 400:
+        print("ERR set_task_finished code:", response.status_code)
+        raise Exception()
+    return
+
+
 def d2s(value: datetime.datetime) -> str:
     return str(value).replace(':', '').replace('-', '').replace(' ', '-')
 
 
-def get_search_by_filename(params: SearchScrapParams) -> str:
-    language_part = ('_lang=' + params.get_language()) if params.get_language() is not None else ''
+def get_search_by_filename(params: PhraseScrapTaskParams) -> str:
+    language_part = ('_lang=' + params.language) if params.language is not None else ''
 
-    return 's_' + params.get_search_by() + '_' + d2s(params.get_scrap_from()) + '_' + d2s(
-        params.get_scrap_to()) + language_part + '.db'
-
-
-def get_user_tweets_filename(params: UserTweetsScrapParams) -> str:
-    return 'ut_' + params.get_username() + '_' + d2s(params.get_scrap_from()) + '_' + d2s(
-        params.get_scrap_to()) + '.db'
+    return 's_' + params.phrase + '_' + d2s(params.since) + '_' + d2s(
+        params.until) + language_part + '.db'
 
 
-def get_user_details_filename(params: UserDetailsScrapParams) -> str:
-    return 'ud_' + params.get_username() + '.db'
+def get_user_tweets_filename(params: UserTweetsScrapTaskParams) -> str:
+    return 'ut_' + params.username + '_' + d2s(params.since) + '_' + d2s(
+        params.until) + '.db'
 
 
-def get_user_favorites_filename(params: UserDetailsScrapParams) -> str:
-    return 'ufa_' + params.get_username() + '.db'
+def get_user_details_filename(params: UserDetailsScrapTaskParams) -> str:
+    return 'ud_' + params.username + '.db'
 
 
-def get_user_followers_filename(params: UserDetailsScrapParams) -> str:
-    return 'ufe_' + params.get_username() + '.db'
+def get_user_favorites_filename(params: UserDetailsScrapTaskParams) -> str:
+    return 'ufa_' + params.username + '.db'
 
 
-def get_user_following_filename(params: UserDetailsScrapParams) -> str:
-    return 'ufi_' + params.get_username() + '.db'
+def get_user_followers_filename(params: UserDetailsScrapTaskParams) -> str:
+    return 'ufe_' + params.username + '.db'
+
+
+def get_user_following_filename(params: UserDetailsScrapTaskParams) -> str:
+    return 'ufi_' + params.username + '.db'
 
 
 def scrap_by_search_to_file(parsed_body):
-    params = SearchScrapParams.from_dict(parsed_body)
+    params = PhraseScrapTaskParams.from_dict(parsed_body)
     filename = get_search_by_filename(params)
-    scrap_service.search_tweets(params, filename, proxy_config.default_proxy_config)
+    # scrap_service.search_tweets(params, filename, proxy_config.default_proxy_config)
+    set_sub_task_finished(ScrapType.SEARCH_BY_PHRASE, params.task_id)
     return {
         'filename': filename,
-        'series': parsed_body['_scrap_series'],
-        'sub_series': 's_' + params.get_search_by(),
+        'series': parsed_body['scrap_series'],
+        'sub_series': 's_' + params.phrase,
     }
 
 
 def scrap_user_tweets_to_file(parsed_body):
-    params: UserTweetsScrapParams = UserTweetsScrapParams.from_dict(parsed_body)
+    params: UserTweetsScrapTaskParams = UserTweetsScrapTaskParams.from_dict(parsed_body)
     filename = get_user_tweets_filename(params)
-    scrap_service.get_user_tweets(params, filename, proxy_config.default_proxy_config)
+    # scrap_service.get_user_tweets(params, filename, proxy_config.default_proxy_config)
+    set_sub_task_finished(ScrapType.USER_TWEETS, params.task_id)
     return {
         'filename': filename,
-        'series': parsed_body['_scrap_series'],
-        'sub_series': 'u_' + params.get_username(),
+        'series': parsed_body['scrap_series'],
+        'sub_series': 'u_' + params.username,
     }
 
 
 def scrap_user_details_to_file(parsed_body):
-    params: UserDetailsScrapParams = UserDetailsScrapParams.from_dict(parsed_body)
+    params: UserDetailsScrapTaskParams = UserDetailsScrapTaskParams.from_dict(parsed_body)
     filename = get_user_details_filename(params)
-    scrap_service.get_user_details(params, filename, proxy_config.default_proxy_config)
+    # scrap_service.get_user_details(params, filename, proxy_config.default_proxy_config)
+    set_task_finished(ScrapType.USER_DETAILS, params.task_id)
     return {
         'filename': filename,
-        'series': parsed_body['_scrap_series'],
-        'sub_series': 'u_' + params.get_username(),
+        'series': parsed_body['scrap_series'],
+        'sub_series': 'u_' + params.username,
     }
 
 
 def scrap_user_favorites_to_file(parsed_body):
-    params: UserDetailsScrapParams = UserDetailsScrapParams.from_dict(parsed_body)
+    params: UserDetailsScrapTaskParams = UserDetailsScrapTaskParams.from_dict(parsed_body)
     filename = get_user_favorites_filename(params)
-    scrap_service.get_user_favorites(params, filename, proxy_config.default_proxy_config)
+    # scrap_service.get_user_favorites(params, filename, proxy_config.default_proxy_config)
+    set_task_finished(ScrapType.USER_FAVORITES, params.task_id)
     return {
         'filename': filename,
-        'series': parsed_body['_scrap_series'],
-        'sub_series': 'u_' + params.get_username(),
+        'series': parsed_body['scrap_series'],
+        'sub_series': 'u_' + params.username,
     }
 
 
 def scrap_user_following_to_file(parsed_body):
-    params: UserDetailsScrapParams = UserDetailsScrapParams.from_dict(parsed_body)
+    params: UserDetailsScrapTaskParams = UserDetailsScrapTaskParams.from_dict(parsed_body)
     filename = get_user_following_filename(params)
-    scrap_service.get_user_following(params, filename, proxy_config.default_proxy_config)
+    # scrap_service.get_user_following(params, filename, proxy_config.default_proxy_config)
+    set_task_finished(ScrapType.USER_FOLLOWINGS, params.task_id)
     return {
         'filename': filename,
-        'series': parsed_body['_scrap_series'],
-        'sub_series': 'u_' + params.get_username(),
+        'series': parsed_body['scrap_series'],
+        'sub_series': 'u_' + params.username,
     }
 
 
 def scrap_user_followers_to_file(parsed_body):
-    params: UserDetailsScrapParams = UserDetailsScrapParams.from_dict(parsed_body)
+    params: UserDetailsScrapTaskParams = UserDetailsScrapTaskParams.from_dict(parsed_body)
     filename = get_user_followers_filename(params)
-    scrap_service.get_user_followers(params, filename, proxy_config.default_proxy_config)
+    # scrap_service.get_user_followers(params, filename, proxy_config.default_proxy_config)
+    set_task_finished(ScrapType.USER_FOLLOWERS, params.task_id)
     return {
         'filename': filename,
-        'series': parsed_body['_scrap_series'],
-        'sub_series': 'u_' + params.get_username(),
+        'series': parsed_body['scrap_series'],
+        'sub_series': 'u_' + params.username,
     }
 
 
 def get_scrap_method(scrap_type: ScrapType):
     return {
-        ScrapType.SEARCH_BY: scrap_by_search_to_file,
+        ScrapType.SEARCH_BY_PHRASE: scrap_by_search_to_file,
         ScrapType.USER_DETAILS: scrap_user_details_to_file,
         ScrapType.USER_TWEETS: scrap_user_tweets_to_file,
-        ScrapType.USER_FOLLOWING: scrap_user_following_to_file,
+        ScrapType.USER_FOLLOWINGS: scrap_user_following_to_file,
         ScrapType.USER_FOLLOWERS: scrap_user_followers_to_file,
         ScrapType.USER_FAVORITES: scrap_user_favorites_to_file
     }[scrap_type]
@@ -141,8 +171,10 @@ def process_message(body):
     logger.info(" [x] Received %r" % body)
     body_string = body.decode("utf-8")
     parsed_body = json.loads(body_string)
-    message_type: ScrapType = [it for it in ScrapType if parsed_body['_type'] in str(it)][0]
+    message_type: ScrapType = [it for it in ScrapType if parsed_body['type'] in str(it)][0]
     logger.info('message_type: ' + str(message_type))
+
+    # time.sleep(1)
 
     try_count = 3
     is_success = False
@@ -151,13 +183,13 @@ def process_message(body):
             logger.info('start new job for scrap user')
             logger.info('job_details: ' + body_string)
             scrap_result = get_scrap_method(message_type)(parsed_body)
-            upload_result_file(
-                series=scrap_result['series'],
-                sub_series=scrap_result['sub_series'],
-                filename=scrap_result['filename'],
-                filepath=scrap_result['filename'],
-                scrap_type=message_type
-            )
+            # upload_result_file(
+            #     series=scrap_result['series'],
+            #     sub_series=scrap_result['sub_series'],
+            #     filename=scrap_result['filename'],
+            #     filepath=scrap_result['filename'],
+            #     scrap_type=message_type
+            # )
             command_utils.run_bash_command('rm ' + scrap_result['filename'])
             is_success = True
             logger.info('finished successful: ' + str(parsed_body))
