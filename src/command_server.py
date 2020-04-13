@@ -111,15 +111,20 @@ def get_all_scrapped_users():
 
 def wait_for_mysql():
     try_count = 100
-    while try_count > 0:
+    success = False
+    while try_count > 0 and not success:
         try:
             commands_mysql_utils.get_db_connection_base()
+            success = True
         except Exception:
             try_count = try_count - 1
             logger.info("error during connect to mysql")
             logger.info("wait 3 seconds for next try")
             time.sleep(3)
-    raise Exception("can't connect with mysql")
+    if success:
+        return
+    else:
+        raise Exception("can't connect with mysql")
 
 
 if __name__ == "__main__":

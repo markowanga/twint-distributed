@@ -29,14 +29,21 @@ def is_db_initialized() -> bool:
 
 
 def initialize_database():
+    print('initialize_database start')
     connection = get_db_connection_base()
     cursor = connection.cursor()
-    cursor.execute(" ".join(open('utils/init_database.sql').readlines()))
+    command = " ".join(open('utils/init_database.sql').readlines())
+    print('command', command)
+    cursor.execute(command)
     connection.commit()
+    print('initialize_database finish')
     return
 
 
 def prepare_database():
     if not is_db_initialized():
+        print('database is not initialized')
         initialize_database()
+    else:
+        print('database is initialized')
     return
