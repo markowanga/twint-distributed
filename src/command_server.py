@@ -1,3 +1,4 @@
+import time
 from uuid import uuid4
 
 from dateutil.parser import parse as date_parser
@@ -108,6 +109,20 @@ def get_all_scrapped_users():
     return jsonify(command_service.get_all_scrapped_tasks())
 
 
+def wait_for_mysql():
+    try_count = 100
+    while try_count > 0:
+        try:
+            commands_mysql_utils.get_db_connection_base()
+        except Exception:
+            try_count = try_count - 1
+            logger.info("error during connect to mysql")
+            logger.info("wait 3 seconds for next try")
+            time.sleep(3)
+    raise Exception("can't connect with mysql")
+
+
 if __name__ == "__main__":
+    wait_for_mysql()
     commands_mysql_utils.prepare_database()
     app.run(host="0.0.0.0", debug=True)
