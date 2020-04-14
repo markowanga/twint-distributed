@@ -114,7 +114,7 @@ def wait_for_mysql():
     success = False
     while try_count > 0 and not success:
         try:
-            commands_mysql_utils.get_db_connection_base()
+            commands_mysql_utils.get_db_connection_base().close()
             success = True
         except Exception:
             try_count = try_count - 1

@@ -21,7 +21,8 @@ services:
       - 5672:5672
 
   flask_command_server:
-    image: marcinwatroba/twint-distributed
+    build: .
+#    image: marcinwatroba/twint-distributed
     restart: unless-stopped
     command: [python, -u, command_server.py]
     ports:
@@ -37,7 +38,8 @@ services:
       - WEBHOOK_HOST=no_host
 
   scrapper_consumer:
-    image: marcinwatroba/twint-distributed
+    build: .
+#    image: marcinwatroba/twint-distributed
     restart: unless-stopped
     command: [python, -u, scrap_worker.py]
     environment:
@@ -49,7 +51,8 @@ services:
       - COMMAND_SERVER_HOST=http://192.168.0.101:5000
 
   file_result_receiver:
-    image: marcinwatroba/twint-distributed
+    build: .
+#    image: marcinwatroba/twint-distributed
     restart: unless-stopped
     command: [python, -u, flask_file_receiver.py]
     volumes:

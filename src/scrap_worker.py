@@ -7,9 +7,10 @@ import time
 import pika
 import requests
 
+import scrap_service
 import utils.docker_logs as docker_logs
 import utils.tor_utils as tor_utils
-from configuration import rabbit_config, worker_config, command_server_config
+from configuration import rabbit_config, worker_config, command_server_config, proxy_config
 from model.hashtag_scrap_params import PhraseScrapTaskParams
 from model.scrap_type import ScrapType
 from model.user_scrap_params import UserTweetsScrapTaskParams, UserDetailsScrapTaskParams
@@ -81,7 +82,7 @@ def get_user_following_filename(params: UserDetailsScrapTaskParams) -> str:
 def scrap_by_search_to_file(parsed_body):
     params = PhraseScrapTaskParams.from_dict(parsed_body)
     filename = get_search_by_filename(params)
-    # scrap_service.search_tweets(params, filename, proxy_config.default_proxy_config)
+    scrap_service.search_tweets(params, filename, proxy_config.default_proxy_config)
     set_sub_task_finished(ScrapType.SEARCH_BY_PHRASE, params.task_id)
     return {
         'filename': filename,
@@ -93,7 +94,7 @@ def scrap_by_search_to_file(parsed_body):
 def scrap_user_tweets_to_file(parsed_body):
     params: UserTweetsScrapTaskParams = UserTweetsScrapTaskParams.from_dict(parsed_body)
     filename = get_user_tweets_filename(params)
-    # scrap_service.get_user_tweets(params, filename, proxy_config.default_proxy_config)
+    scrap_service.get_user_tweets(params, filename, proxy_config.default_proxy_config)
     set_sub_task_finished(ScrapType.USER_TWEETS, params.task_id)
     return {
         'filename': filename,
@@ -105,7 +106,7 @@ def scrap_user_tweets_to_file(parsed_body):
 def scrap_user_details_to_file(parsed_body):
     params: UserDetailsScrapTaskParams = UserDetailsScrapTaskParams.from_dict(parsed_body)
     filename = get_user_details_filename(params)
-    # scrap_service.get_user_details(params, filename, proxy_config.default_proxy_config)
+    scrap_service.get_user_details(params, filename, proxy_config.default_proxy_config)
     set_task_finished(ScrapType.USER_DETAILS, params.task_id)
     return {
         'filename': filename,
@@ -117,7 +118,7 @@ def scrap_user_details_to_file(parsed_body):
 def scrap_user_favorites_to_file(parsed_body):
     params: UserDetailsScrapTaskParams = UserDetailsScrapTaskParams.from_dict(parsed_body)
     filename = get_user_favorites_filename(params)
-    # scrap_service.get_user_favorites(params, filename, proxy_config.default_proxy_config)
+    scrap_service.get_user_favorites(params, filename, proxy_config.default_proxy_config)
     set_task_finished(ScrapType.USER_FAVORITES, params.task_id)
     return {
         'filename': filename,
@@ -129,7 +130,7 @@ def scrap_user_favorites_to_file(parsed_body):
 def scrap_user_following_to_file(parsed_body):
     params: UserDetailsScrapTaskParams = UserDetailsScrapTaskParams.from_dict(parsed_body)
     filename = get_user_following_filename(params)
-    # scrap_service.get_user_following(params, filename, proxy_config.default_proxy_config)
+    scrap_service.get_user_following(params, filename, proxy_config.default_proxy_config)
     set_task_finished(ScrapType.USER_FOLLOWINGS, params.task_id)
     return {
         'filename': filename,
@@ -141,7 +142,7 @@ def scrap_user_following_to_file(parsed_body):
 def scrap_user_followers_to_file(parsed_body):
     params: UserDetailsScrapTaskParams = UserDetailsScrapTaskParams.from_dict(parsed_body)
     filename = get_user_followers_filename(params)
-    # scrap_service.get_user_followers(params, filename, proxy_config.default_proxy_config)
+    scrap_service.get_user_followers(params, filename, proxy_config.default_proxy_config)
     set_task_finished(ScrapType.USER_FOLLOWERS, params.task_id)
     return {
         'filename': filename,
