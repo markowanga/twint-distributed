@@ -176,7 +176,7 @@ def process_message(body):
     message_type: ScrapType = [it for it in ScrapType if parsed_body['type'] in str(it)][0]
     logger.info('message_type: ' + str(message_type))
 
-    try_count = 3
+    try_count = 10
     is_success = False
     while not is_success and try_count > 0:
         try:
@@ -223,11 +223,12 @@ def prepare_rabbit_connect() -> pika.BlockingConnection:
 
 
 def on_message(ch, method_frame, _header_frame, body, args):
+    # (conn, thrds) = args
     (conn, thrds) = args
     delivery_tag = method_frame.delivery_tag
     t = threading.Thread(target=do_work, args=(conn, ch, delivery_tag, body))
     t.start()
-    thrds.append(t)
+    # thrds.append(t)
 
 
 connection = prepare_rabbit_connect()
@@ -236,8 +237,9 @@ channel = connection.channel()
 channel.queue_declare(queue=worker_config.get_queue_name(), durable=True)
 channel.basic_qos(prefetch_count=1)
 
-threads = []
-on_message_callback = functools.partial(on_message, args=(connection, threads))
+# threads = []
+# on_message_callback = functools.partial(on_message, args=(connection, threads))
+on_message_callback = functools.partial(on_message, args=(connection))
 channel.basic_consume(queue=worker_config.get_queue_name(), on_message_callback=on_message_callback)
 
 channel.start_consuming()
