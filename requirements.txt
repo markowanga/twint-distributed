@@ -4,9 +4,9 @@ pysocks
 pandas
 numpy
 pika
-twint
 python-dateutil
 pymongo
 dacite
 mysql-connector-python
 pymysql
+git+https://github.com/markowanga/twint.git@origin/master#egg=twint
