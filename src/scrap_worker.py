@@ -224,7 +224,7 @@ def prepare_rabbit_connect() -> pika.BlockingConnection:
 
 def on_message(ch, method_frame, _header_frame, body, args):
     # (conn, thrds) = args
-    (conn, thrds) = args
+    (conn) = args
     delivery_tag = method_frame.delivery_tag
     t = threading.Thread(target=do_work, args=(conn, ch, delivery_tag, body))
     t.start()
