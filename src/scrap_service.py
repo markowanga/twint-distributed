@@ -19,7 +19,7 @@ def get_common_config(
 ) -> twint.Config:
     twint_config = twint.Config()
 
-    twint_config.Store_object = True
+    twint_config.Store_object = False
     twint_config.Hide_output = True
 
     if interval is not None:
