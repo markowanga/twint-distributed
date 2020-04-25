@@ -170,6 +170,8 @@ def support_finish_session(session_id: str):
             send_session_finished_webhook(session_name)
         else:
             logger.info('webhook not configured')
+    else:
+        logger.info('count to finish session: ' + str(count))
     return
 
 
@@ -195,7 +197,6 @@ def set_task_as_finished(task_id: str, task_type: ScrapType):
 
 
 def set_sub_task_as_finished(sub_task_id: str, task_type: ScrapType):
-    dao = ''
     if task_type == ScrapType.SEARCH_BY_PHRASE:
         dao = search_by_task_dao
     elif task_type == ScrapType.USER_TWEETS:
