@@ -72,7 +72,7 @@ def get_phrase_tweets(phrase: str):
     merged_data_df = pd.concat([
         sqlite_util.get_df_from_sqlite_db(db_file, 'SELECT * FROM tweets')
         for db_file in db_files
-    ]).drop_duplicates(subset="id_str", keep=False)
+    ]).drop_duplicates(subset="id_str")
     merged_data_df = merged_data_df.drop_duplicates(subset="id_str")
     logger.info(merged_data_df.head())
     return df_to_json_response(merged_data_df)
