@@ -73,10 +73,8 @@ def get_phrase_tweets(phrase: str):
     merged_data_df = pd.concat([
         sqlite_util.get_df_from_sqlite_db(db_file, 'SELECT * FROM tweets')
         for db_file in db_files
-    ])
-    logger.info('rows count with duplicate: ' + merged_data_df.size)
-    merged_data_df.drop_duplicates(subset="id_str", keep=False, inplace=True)
-    logger.info('rows count without duplicate: ' + merged_data_df.size)
+    ]).drop_duplicates(subset="id_str", keep=False)
+    logger.info('rows count without duplicate: ' + str(merged_data_df.size))
     logger.info("/get_phrase_tweets -> df rows count: " + str(merged_data_df.size))
     logger.info("/get_phrase_tweets -> columns: " + str(merged_data_df.columns))
     logger.info("/get_phrase_tweets -> head log below")
