@@ -66,7 +66,6 @@ def get_user_tweets(username: str):
 def get_phrase_tweets(phrase: str):
     # since = request.args.get('since')
     # until = request.args.get('until')
-    logger.info('request tweets for phrase: ' + phrase)
     phrase_folder_name = 's_' + phrase
     base_directory_path = ROOT_DATA_DIR + '/scrap_data/search_by_phrase' + '/' + phrase_folder_name + '/'
     db_files = directory_utils.get_db_files_path_list_from_directory(base_directory_path)
@@ -74,12 +73,7 @@ def get_phrase_tweets(phrase: str):
         sqlite_util.get_df_from_sqlite_db(db_file, 'SELECT * FROM tweets')
         for db_file in db_files
     ]).drop_duplicates(subset="id_str", keep=False)
-    logger.info('rows count without duplicate: ' + str(merged_data_df.size))
-    merged_data_df = merged_data_df.drop_duplicates(subset="id_str", keep=False)
-    logger.info('rows count with duplicate: ' + str(merged_data_df.size))
-    logger.info("/get_phrase_tweets -> df rows count: " + str(merged_data_df.size))
-    logger.info("/get_phrase_tweets -> columns: " + str(merged_data_df.columns))
-    logger.info("/get_phrase_tweets -> head log below")
+    merged_data_df = merged_data_df.drop_duplicates(subset="id_str")
     logger.info(merged_data_df.head())
     return df_to_json_response(merged_data_df)
 
