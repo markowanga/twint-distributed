@@ -73,6 +73,10 @@ def get_phrase_tweets(phrase: str):
         sqlite_util.get_df_from_sqlite_db(db_file, 'SELECT * FROM tweets')
         for db_file in db_files
     ]).drop_duplicates(subset="id_str", keep=False, inplace=True)
+    logger.info("/get_phrase_tweets -> df rows count: " + str(merged_data_df.size))
+    logger.info("/get_phrase_tweets -> columns: " + str(merged_data_df.columns))
+    logger.info("/get_phrase_tweets -> head log below")
+    logger.info(merged_data_df.head())
     return df_to_json_response(merged_data_df)
 
 
