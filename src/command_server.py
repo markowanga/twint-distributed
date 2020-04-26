@@ -81,7 +81,7 @@ def add_search_to_scrap():
     command_service.add_search_to_scrap(
         phrase=request.form['to_search'],
         since=date_parser(request.form['since']) if 'since' in request.form else None,
-        until=date_parser(request.form['until']) if 'since' in request.form else None,
+        until=date_parser(request.form['until']) if 'until' in request.form else None,
         language=request.form['language'] if 'language' in request.form else None,
         queue_name=request.form['queue_name'],
         scrap_series=request.form['scrap_series'],
