@@ -75,6 +75,8 @@ def get_phrase_tweets(phrase: str):
         for db_file in db_files
     ]).drop_duplicates(subset="id_str", keep=False)
     logger.info('rows count without duplicate: ' + str(merged_data_df.size))
+    merged_data_df = merged_data_df.drop_duplicates(subset="id_str", keep=False)
+    logger.info('rows count with duplicate: ' + str(merged_data_df.size))
     logger.info("/get_phrase_tweets -> df rows count: " + str(merged_data_df.size))
     logger.info("/get_phrase_tweets -> columns: " + str(merged_data_df.columns))
     logger.info("/get_phrase_tweets -> head log below")
