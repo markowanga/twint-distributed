@@ -21,6 +21,9 @@ def get_common_config(
 
     twint_config.Store_object = False
     twint_config.Hide_output = True
+    twint_config.Retries_count = 100
+    twint_config.Min_wait_time = 90
+    twint_config.Backoff_exponent = 3.0
 
     if interval is not None:
         twint_config.Since = str(remove_microseconds_from_datetime(interval.since))
