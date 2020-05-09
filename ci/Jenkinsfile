@@ -1,0 +1,41 @@
+pipeline {
+    agent none
+    environment {
+        registry = "marcinwatroba/twint-distributed"
+        registryCredential = 'marcinwatroba_dockerhub'
+    }
+    stages {
+        stage('checkout sources') {
+            agent any
+            steps {
+                git branch: 'master', credentialsId: 'markowanga_github',
+                        url: 'https://github.com/markowanga/twint-distributed.git'
+            }
+        }
+        stage('build & push docker') {
+            agent {
+                docker {
+                    image 'docker'
+                    args '-u root -v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
+            steps {
+                script {
+                    dockerImageWithNumber = docker.build(registry + ":$BUILD_NUMBER", './')
+                    dockerImageLatest = docker.build(registry + ":latest", './')
+                    docker.withRegistry( '', registryCredential ) {
+                        dockerImageWithNumber.push()
+                        dockerImageLatest.push()
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            node('master') {
+                sh 'rm -rf *'
+            }
+        }
+    }
+}
