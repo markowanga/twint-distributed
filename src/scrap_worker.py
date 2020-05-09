@@ -30,7 +30,7 @@ def set_task_finished(task_type: ScrapType, task_id: str):
     response = requests.post(url, data=post_data)
     if response.status_code >= 400:
         print("ERR set_task_finished code:", response.status_code)
-        raise Exception()
+        raise Exception('error in set_task_as_finished')
     return
 
 
@@ -43,7 +43,7 @@ def set_sub_task_finished(task_type: ScrapType, sub_task_id: str):
     response = requests.post(url, data=post_data)
     if response.status_code >= 400:
         print("ERR set_task_finished code:", response.status_code)
-        raise Exception()
+        raise Exception('error in set_sub_task_as_finished')
     return
 
 
