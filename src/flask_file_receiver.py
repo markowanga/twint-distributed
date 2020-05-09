@@ -74,7 +74,6 @@ def get_phrase_tweets(phrase: str):
         for db_file in db_files
     ]).drop_duplicates(subset="id_str")
     merged_data_df = merged_data_df.drop_duplicates(subset="id_str")
-    logger.info(merged_data_df.head())
     return df_to_json_response(merged_data_df)
 
 
