@@ -176,7 +176,7 @@ def process_message(body):
     message_type: ScrapType = [it for it in ScrapType if parsed_body['type'] in str(it)][0]
     logger.info('message_type: ' + str(message_type))
 
-    try_count = 10
+    try_count = 100
     is_success = False
     while not is_success and try_count > 0:
         try:
@@ -197,6 +197,8 @@ def process_message(body):
             try_count = try_count - 1
             logger.error("Error during work")
             logger.exception(exception)
+            logger.info('sleep for 60 secs in case of error')
+            time.sleep(60)
     return is_success
 
 
