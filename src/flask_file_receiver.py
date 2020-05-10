@@ -66,15 +66,18 @@ def get_user_tweets(username: str):
 def get_phrase_tweets(phrase: str):
     # since = request.args.get('since')
     # until = request.args.get('until')
+    logger.info('get_phrase_tweets ' + phrase + ' start read tweets')
     phrase_folder_name = 's_' + phrase
     base_directory_path = ROOT_DATA_DIR + '/scrap_data/search_by_phrase' + '/' + phrase_folder_name + '/'
     db_files = directory_utils.get_db_files_path_list_from_directory(base_directory_path)
     merged_data_df = pd.concat([
         sqlite_util.get_df_from_sqlite_db(db_file, 'SELECT * FROM tweets')
         for db_file in db_files
-    ]).drop_duplicates(subset="id_str")
-    merged_data_df = merged_data_df.drop_duplicates(subset="id_str")
-    return df_to_json_response(merged_data_df)
+    ])
+    logger.info('get_phrase_tweets ' + phrase + ' start remove duplicates')
+    df_without_duplicates = merged_data_df.drop_duplicates(subset="id_str")
+    logger.info('get_phrase_tweets ' + phrase + ' processing finished')
+    return df_to_json_response(df_without_duplicates)
 
 
 if __name__ == "__main__":
