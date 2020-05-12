@@ -55,11 +55,18 @@ def get_user_details(username: str):
     return df_to_json_response(df)
 
 
-# @app.route("/get_user_tweets/<username>", methods=['GET'])
-# def get_user_tweets(username: str):
-#     since = request.args.get('since')
-#     until = request.args.get('until')
-#     return get_success_response()
+@app.route("/get_user_tweets/<username>", methods=['GET'])
+def get_user_tweets(username: str):
+    logger.info('get_user_tweets ' + username + ' start read tweets')
+    user_folder_name = 'u_' + username
+    base_directory_path = ROOT_DATA_DIR + '/scrap_data/user_tweets' + '/' + user_folder_name + '/'
+    db_files = directory_utils.get_db_files_path_list_from_directory(base_directory_path)
+    merged_data_df = pd.concat([
+        sqlite_util.get_df_from_sqlite_db(db_file, 'SELECT * FROM tweets')
+        for db_file in db_files
+    ])
+    logger.info('get_user_tweets ' + username + ' processing finished')
+    return df_to_json_response(merged_data_df)
 
 
 @app.route("/get_phrase_tweets/<phrase>", methods=['GET'])
