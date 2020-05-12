@@ -69,19 +69,19 @@ def get_user_tweets(username: str):
     return df_to_json_response(merged_data_df)
 
 
-@app.route("/get_phrase_tweets/<phrase>", methods=['GET'])
-def get_phrase_tweets(phrase: str):
-    logger.info('get_phrase_tweets ' + phrase + ' start read tweets')
-    phrase_folder_name = 's_' + phrase
+@app.route("/get_searched_tweets/<to_search>", methods=['GET'])
+def get_searched_tweets(to_search: str):
+    logger.info('get_searched_tweets ' + to_search + ' start read tweets')
+    phrase_folder_name = 's_' + to_search
     base_directory_path = ROOT_DATA_DIR + '/scrap_data/search_by_phrase' + '/' + phrase_folder_name + '/'
     db_files = directory_utils.get_db_files_path_list_from_directory(base_directory_path)
     merged_data_df = pd.concat([
         sqlite_util.get_df_from_sqlite_db(db_file, 'SELECT * FROM tweets')
         for db_file in db_files
     ])
-    logger.info('get_phrase_tweets ' + phrase + ' start remove duplicates')
+    logger.info('get_searched_tweets ' + to_search + ' start remove duplicates')
     df_without_duplicates = merged_data_df.drop_duplicates(subset="id_str")
-    logger.info('get_phrase_tweets ' + phrase + ' processing finished')
+    logger.info('get_searched_tweets ' + to_search + ' processing finished')
     return df_to_json_response(df_without_duplicates)
 
 
