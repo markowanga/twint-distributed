@@ -6,7 +6,7 @@ import utils.directory_utils as directory_utils
 import utils.docker_logs as docker_logs
 import utils.sqlite_util as sqlite_util
 
-logger = docker_logs.get_logger('flask_file_receiver')
+logger = docker_logs.get_logger('data_server')
 
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
@@ -55,17 +55,15 @@ def get_user_details(username: str):
     return df_to_json_response(df)
 
 
-@app.route("/get_user_tweets/<username>", methods=['GET'])
-def get_user_tweets(username: str):
-    since = request.args.get('since')
-    until = request.args.get('until')
-    return get_success_response()
+# @app.route("/get_user_tweets/<username>", methods=['GET'])
+# def get_user_tweets(username: str):
+#     since = request.args.get('since')
+#     until = request.args.get('until')
+#     return get_success_response()
 
 
 @app.route("/get_phrase_tweets/<phrase>", methods=['GET'])
 def get_phrase_tweets(phrase: str):
-    # since = request.args.get('since')
-    # until = request.args.get('until')
     logger.info('get_phrase_tweets ' + phrase + ' start read tweets')
     phrase_folder_name = 's_' + phrase
     base_directory_path = ROOT_DATA_DIR + '/scrap_data/search_by_phrase' + '/' + phrase_folder_name + '/'
