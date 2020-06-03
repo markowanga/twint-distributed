@@ -66,7 +66,8 @@ def get_user_tweets(username: str):
         for db_file in db_files
     ])
     logger.info('get_user_tweets ' + username + ' processing finished')
-    return df_to_json_response(merged_data_df)
+    df_without_duplicates = merged_data_df.drop_duplicates(subset="id_str")
+    return df_to_json_response(df_without_duplicates)
 
 
 @app.route("/get_searched_tweets/<to_search>", methods=['GET'])
@@ -83,6 +84,33 @@ def get_searched_tweets(to_search: str):
     df_without_duplicates = merged_data_df.drop_duplicates(subset="id_str")
     logger.info('get_searched_tweets ' + to_search + ' processing finished')
     return df_to_json_response(df_without_duplicates)
+
+
+@app.route("/get_user_followers/<username>", methods=['GET'])
+def get_user_followers(username: str):
+    user_folder_name = 'u_' + username
+    user_details_db_file = 'ufe_' + username + '.db'
+    db_file_path = ROOT_DATA_DIR + '/scrap_data/user_details' + '/' + user_folder_name + '/' + user_details_db_file
+    df = sqlite_util.get_df_from_sqlite_db(db_file_path, 'SELECT * FROM followers_names')['user']
+    return df_to_json_response(df)
+
+
+@app.route("/get_user_followings/<username>", methods=['GET'])
+def get_user_followings(username: str):
+    user_folder_name = 'u_' + username
+    user_details_db_file = 'ufi_' + username + '.db'
+    db_file_path = ROOT_DATA_DIR + '/scrap_data/user_details' + '/' + user_folder_name + '/' + user_details_db_file
+    df = sqlite_util.get_df_from_sqlite_db(db_file_path, 'SELECT * FROM following_names')['user']
+    return df_to_json_response(df)
+
+
+@app.route("/get_user_favorites/<username>", methods=['GET'])
+def get_user_favorites(username: str):
+    user_folder_name = 'u_' + username
+    user_details_db_file = 'ufa_' + username + '.db'
+    db_file_path = ROOT_DATA_DIR + '/scrap_data/user_details' + '/' + user_folder_name + '/' + user_details_db_file
+    df = sqlite_util.get_df_from_sqlite_db(db_file_path, 'SELECT * FROM favorites')['tweet_id']
+    return df_to_json_response(df)
 
 
 if __name__ == "__main__":

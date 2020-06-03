@@ -1,9 +1,10 @@
 version: "3.7"
 services:
   # database for commands
-  db:
+  twint_distributed_mysql_db:
     image: mysql:8.0.19
     command: --default-authentication-plugin=mysql_native_password
+    container_name: twint_distributed_mysql_db
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: test1234
@@ -11,32 +12,32 @@ services:
       - ./db_data:/var/lib/mysql
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-    ports:
-      - 3306:3306
+#    ports:
+#      - 3306:3306
 
   # queue to serve tasks for scrap
-  rabbitmq:
+  twint_distributed_rabbitmq:
     image: rabbitmq:3.8.3-management
     volumes:
       - ./rabbit_data:/var/lib/rabbitmq
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     ports:
-      - 15672:15672
-      - 5672:5672
+      - 15672:15672 # management plugin
+#      - 5672:5672 # RabbitMQ
 
   # command server to preview added and finished tasks
-  command_server:
+  twint_distributed_command_server:
     image: marcinwatroba/twint-distributed:latest
     restart: unless-stopped
     command: [python, -u, command_server.py]
     ports:
       - 5000:5000
     environment:
-      - RABBIT_HOST=192.168.0.101
+      - RABBIT_HOST=twint_distributed_rabbitmq
       - RABBIT_USERNAME=guest
       - RABBIT_PASSWORD=guest
-      - MYSQL_HOST=[mysql_host]
+      - MYSQL_HOST=twint_distributed_mysql_db
       - MYSQL_PORT=3306
       - MYSQL_USER=root
       - MYSQL_PASSWORD=test1234
@@ -46,23 +47,23 @@ services:
       - /etc/timezone:/etc/timezone:ro
 
   # consumer -- this service can be scaled
-  scrapper_consumer:
+  twint_distributed_scrapper_consumer:
     image: marcinwatroba/twint-distributed:latest
     restart: unless-stopped
     command: [python, -u, scrap_worker.py]
     environment:
-      - RABBIT_HOST=192.168.0.124
+      - RABBIT_HOST=twint_distributed_rabbitmq
       - RABBIT_USERNAME=guest
       - RABBIT_PASSWORD=guest
       - UPLOAD_FILE_HOST=[upload_file_host]
       - QUEUE_NAME=bot_detection
-      - COMMAND_SERVER_HOST=http://192.168.0.124:5000
+      - COMMAND_SERVER_HOST=twint_distributed_command_server
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
 
   # service to save data
-  data_server:
+  twint_distributed_data_server:
     image: marcinwatroba/twint-distributed:latest
     restart: unless-stopped
     command: [python, -u, data_server.py]

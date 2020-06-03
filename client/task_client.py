@@ -108,3 +108,26 @@ class TwintDistributedTaskClient:
         if response.status_code >= 400:
             print("ERR path code:", response.status_code)
         return
+
+
+def add_user_to_full_scrap(username: str, client: TwintDistributedTaskClient):
+    print('start adding username')
+    client.add_user_tweets_to_scrap(username, ScrapInterval.MONTH, 'bot_detection', 'tomek', None, None)
+    client.add_user_details_to_scrap(username, 'bot_detection', 'tomek')
+    client.add_user_favorites_to_scrap(username, 'bot_detection', 'tomek')
+    client.add_user_followings_to_scrap(username, 'bot_detection', 'tomek')
+    client.add_user_followers_to_scrap(username, 'bot_detection', 'tomek')
+    print('finish adding username')
+    return
+
+
+def run():
+    client = TwintDistributedTaskClient('http://192.168.0.124:5000')
+    users = ['AndrzejDuda', 'M_K_Blonska', 'pawel_tanajno', 'jakubiak_marek', 'mir_piotrowski', 'krzysztofbosak',
+             'szymon_holownia', 'KosiniakKamysz', 'Grzywa_Slawomir', 'RobertBiedron', 'trzaskowski_']
+    for user in users:
+        add_user_to_full_scrap(user, client)
+    return
+
+
+run()
