@@ -90,7 +90,7 @@ def get_searched_tweets(to_search: str):
 def get_user_followers(username: str):
     user_folder_name = 'u_' + username
     user_details_db_file = 'ufe_' + username + '.db'
-    db_file_path = ROOT_DATA_DIR + '/scrap_data/user_details' + '/' + user_folder_name + '/' + user_details_db_file
+    db_file_path = ROOT_DATA_DIR + '/scrap_data/user_followers' + '/' + user_folder_name + '/' + user_details_db_file
     df = sqlite_util.get_df_from_sqlite_db(db_file_path, 'SELECT * FROM followers_names')['user']
     return df_to_json_response(df)
 
@@ -99,7 +99,7 @@ def get_user_followers(username: str):
 def get_user_followings(username: str):
     user_folder_name = 'u_' + username
     user_details_db_file = 'ufi_' + username + '.db'
-    db_file_path = ROOT_DATA_DIR + '/scrap_data/user_details' + '/' + user_folder_name + '/' + user_details_db_file
+    db_file_path = ROOT_DATA_DIR + '/scrap_data/user_followings' + '/' + user_folder_name + '/' + user_details_db_file
     df = sqlite_util.get_df_from_sqlite_db(db_file_path, 'SELECT * FROM following_names')['user']
     return df_to_json_response(df)
 
@@ -108,7 +108,7 @@ def get_user_followings(username: str):
 def get_user_favorites(username: str):
     user_folder_name = 'u_' + username
     user_details_db_file = 'ufa_' + username + '.db'
-    db_file_path = ROOT_DATA_DIR + '/scrap_data/user_details' + '/' + user_folder_name + '/' + user_details_db_file
+    db_file_path = ROOT_DATA_DIR + '/scrap_data/user_favorites' + '/' + user_folder_name + '/' + user_details_db_file
     df = sqlite_util.get_df_from_sqlite_db(db_file_path, 'SELECT * FROM favorites')['tweet_id']
     return df_to_json_response(df)
 
