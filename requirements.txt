@@ -9,5 +9,5 @@ pymongo
 dacite
 mysql-connector-python
 pymysql
-# twint
--e git://github.com/twintproject/twint.git@origin/master#egg=twint
+twint==2.1.18
+# -e git://github.com/twintproject/twint.git@origin/master#egg=twint
