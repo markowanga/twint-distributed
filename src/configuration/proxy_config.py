@@ -20,4 +20,4 @@ class ProxyConfig:
             self.get_port()) + '; proxy_type=' + self.get_proxy_type() + ')'
 
 
-default_proxy_config = ProxyConfig('localhost', 9050, 'socks5')
+default_proxy_config = ProxyConfig('localhost', 9050, 'SOCKS5')

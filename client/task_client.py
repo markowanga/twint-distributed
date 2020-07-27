@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 from typing import Optional, Dict
 
@@ -47,7 +47,7 @@ class TwintDistributedTaskClient:
             'queue_name': queue_name,
             'scrap_series': scrap_series,
             'since': since.isoformat() if since is not None else None,
-            'until': until.isoformat() if since is not None else None
+            'until': until.isoformat() if until is not None else None
         }
         self.__call_post_request('/add_user_tweets_to_scrap', post_data)
         return
@@ -108,3 +108,33 @@ class TwintDistributedTaskClient:
         if response.status_code >= 400:
             print("ERR path code:", response.status_code)
         return
+
+
+# def main():
+#     result = requests.get('http://api.pandemocje.pl/api/hashtag_distribution')
+#     hashtag_count_dict = result.json()['plot_raw']
+#     hashtags = [it for it in hashtag_count_dict.keys() if hashtag_count_dict[it] > 100]
+#     client = TwintDistributedTaskClient('http://192.168.0.124:5000')
+#     for hashtag in hashtags:
+#         print(hashtag)
+#         client.add_search_to_scrap(hashtag, ScrapInterval.MONTH, 'bot_detection', 'hashtag_analyse', since=None,
+#                                    until=None, language='pl')
+#     return
+#
+#
+# def for_kajdanowicz():
+#     users = ['AndrzejDuda', 'M_K_Blonska', 'pawel_tanajno', 'jakubiak_marek', 'mir_piotrowski', 'krzysztofbosak',
+#              'szymon_holownia', 'KosiniakKamysz', 'Grzywa_Slawomir', 'RobertBiedron', 'trzaskowski_']
+#     client = TwintDistributedTaskClient('http://192.168.0.124:5000')
+#
+#     scrap_since = datetime.now() - timedelta(days=60)
+#     print(scrap_since.isoformat())
+#
+#     for user in users:
+#         print(user)
+#         client.add_user_tweets_to_scrap(user, ScrapInterval.MONTH, 'bot_detection', 'kajdanowicz',
+#                                         since=None, until=None)
+#
+#
+# # main()
+# for_kajdanowicz()

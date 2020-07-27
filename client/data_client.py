@@ -30,3 +30,23 @@ class TwintDistributedDataClient:
     def __call_get_request(self, path: str) -> pd.DataFrame:
         response = requests.get(self.data_server_host + requests.utils.quote(path))
         return pd.read_json(response.content)
+
+
+def main():
+    client = TwintDistributedDataClient('http://twitterdata.theliver.pl')
+    users = ['AndrzejDuda', 'M_K_Blonska', 'pawel_tanajno', 'jakubiak_marek', 'mir_piotrowski', 'krzysztofbosak',
+             'szymon_holownia', 'KosiniakKamysz', 'Grzywa_Slawomir', 'RobertBiedron', 'trzaskowski_']
+    for user in users:
+        responses = [
+            client.get_user_tweets(user).sort_values(by='created_at')[['created_at']],
+            # client.get_user_details(user),
+            # client.get_user_followers(user),
+            # client.get_user_followings(user),
+            # client.get_user_favorites(user)
+        ]
+        print(user)
+        print([it for it in responses])
+    return
+
+
+main()
