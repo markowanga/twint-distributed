@@ -7,7 +7,7 @@ pika
 python-dateutil
 pymongo
 dacite
+aiohttp_socks==0.4.1
 mysql-connector-python
 pymysql
-twint==2.1.18
-# -e git://github.com/twintproject/twint.git@origin/master#egg=twint
+-e git://github.com/twintproject/twint.git@origin/master#egg=twint
