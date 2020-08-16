@@ -29,10 +29,10 @@ def get_common_config(
         twint_config.Since = str(remove_microseconds_from_datetime(interval.since))
         twint_config.Until = str(remove_microseconds_from_datetime(interval.until))
 
-    # if proxy_config is not None:
-    #     twint_config.Proxy_host = proxy_config.get_host()
-    #     twint_config.Proxy_port = proxy_config.get_port()
-    #     twint_config.Proxy_type = proxy_config.get_proxy_type()
+    if proxy_config is not None:
+        twint_config.Proxy_host = proxy_config.get_host()
+        twint_config.Proxy_port = proxy_config.get_port()
+        twint_config.Proxy_type = proxy_config.get_proxy_type()
 
     twint_config.Database = db_file_path
 
