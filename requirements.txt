@@ -7,7 +7,7 @@ pika
 python-dateutil
 pymongo
 dacite
-aiohttp_socks==0.4.1
+aiohttp_socks
 mysql-connector-python
 pymysql
-twint==2.1.18
+twint
