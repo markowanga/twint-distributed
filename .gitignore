@@ -147,3 +147,5 @@ static
 
 data
 db_data
+
+src/test_run.py

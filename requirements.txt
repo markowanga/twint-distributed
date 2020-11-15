@@ -10,4 +10,4 @@ dacite
 aiohttp_socks
 mysql-connector-python
 pymysql
-twint
+-e git://github.com/twintproject/twint.git#egg=twint
