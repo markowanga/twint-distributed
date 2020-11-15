@@ -67,9 +67,6 @@ def get_user_details(
     return
 
 
-get_user_details(UserDetailsScrapTaskParams('dsaf', 'zylandlhb', 'ss', 'ss'), 'db.db', None)
-
-
 def get_user_favorites(
         params: UserDetailsScrapTaskParams,
         db_file_path: str,
